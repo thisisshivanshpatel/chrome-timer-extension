@@ -1,0 +1,10 @@
+{
+    "manifest_version": 3,
+    "name": "ps-timer",
+    "version": "1.0",
+    "description": "This extension will help you set a timer for your tasks",
+    "action": {
+        "default_popup": "app.html",
+        "default_icon": "clock.png"
+    }
+}
