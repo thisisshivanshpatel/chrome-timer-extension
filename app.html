@@ -8,47 +8,30 @@
     <link
         href="https://fonts.googleapis.com/css2?family=Kanit:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Lato&display=swap"
         rel="stylesheet">
-
-    <style>
-        .lato-regular {
-            font-family: "Lato", serif;
-            font-weight: 400;
-            font-style: normal;
-            font-size: 15px;
-        }
-
-        .ext-heading {
-            font-weight: 600;
-            font-size: 20px;
-            text-align: center;
-        }
-
-        .theme {
-            color: #8B5DFF;
-        }
-
-        body {
-            box-sizing: border-box;
-            background-color: #EBEAFF;
-        }
-
-        /* img:hover {
-            animation: shake 0.5s;
-            animation-iteration-count: infinite;
-        } */
-    </style>
+    <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
     <div style="height:450; width: 250px;">
-        <p class="lato-regular ext-heading theme">Stop watch and Timer</h1>
-        <h6>created by Shivansh Patel</h6>
-        <img src="clock.png" height="250px" width="250px" />
+        <p class="ext-heading theme">Stop watch and Timer</h1>
 
-        <div class="lato-regular">Time:-<span id="time"></span></div>
-        <button onclick="startTimer()">Start</button>
-        <button onclick="stopTimer()">Stop</button>
+            <img class="clock" src="clock.png" height="200px" width="200px" />
+
+            <input type="number" min="0" id="hours" placeholder="Hours" style="min-width: 65px; max-width: 65px;">
+            <input type="number" min="0" max="59" id="minutes" placeholder="Minutes"
+                style="min-width: 65px; max-width: 65px;">
+            <input type="number" min="0" max="60" id="seconds" placeholder="Seconds"
+                style="min-width: 65px; max-width: 65px;">
+
+            <button id="start">Start</button>
+            <button id="stop">Stop</button>
+            <button id="reset">Reset</button>
+        <div id="display">00:00:00</div>
         <script src="popup.js"></script>
+
+        <footer>
+            <h5 style="font-weight: bolder;">created by Shivansh Patel</h5>
+        </footer>
     </div>
 </body>
 
