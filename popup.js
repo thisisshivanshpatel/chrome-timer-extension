@@ -1,83 +1,148 @@
-let timer;
-let timeLeft = 0;
+let timers = [];
 
 const startButton = document.getElementById("start");
-const stopButton = document.getElementById("stop");
-const resetButton = document.getElementById("reset");
-const display = document.getElementById("display");
+const timersContainer = document.getElementById("timers");
 
 startButton.addEventListener("click", function () {
-  const hours = parseInt(document.getElementById("hours").value) || 0;
-  const minutes = parseInt(document.getElementById("minutes").value) || 0;
-  const seconds = parseInt(document.getElementById("seconds").value) || 0;
+  const hours = parseInt(document.getElementById("hours")?.value) || 0;
+  const minutes = parseInt(document.getElementById("minutes")?.value) || 0;
+  const seconds = parseInt(document.getElementById("seconds")?.value) || 0;
 
-  document.getElementById("hours").value = null;
-  document.getElementById("minutes").value = null;
-  document.getElementById("seconds").value = null;
-
-  // converting time to seconds
-  const convertTimeToSeconds = hours * 3600 + minutes * 60 + seconds;
-
-  // setting time left
-  timeLeft = convertTimeToSeconds;
-
-  if (chrome.storage) {
-    chrome.storage.local.set({ timeLeft: timeLeft, isRunning: true });
+  if (hours) {
+    document.getElementById("hours").value = null;
   }
-  timer = setInterval(updateTimer, 1000);
+
+  if (minutes) {
+    document.getElementById("minutes").value = null;
+  }
+
+  if (seconds) {
+    document.getElementById("seconds").value = null;
+  }
+
+  const timeLeft = hours * 3600 + minutes * 60 + seconds;
+  const timerId = timers.length;
+
+  const timer = {
+    id: timerId,
+    timeLeft: timeLeft,
+    interval: null,
+    isRunning: true,
+  };
+
+  timers.push(timer);
+  saveTimers();
+  renderTimer(timer);
+  startTimer(timer);
 });
 
-stopButton.addEventListener("click", function () {
-  clearInterval(timer);
-  if (chrome.storage) {
-    chrome.storage.local.set({ isRunning: false });
-  }
-});
+function renderTimer(timer) {
+  const timerElement = document.createElement("div");
+  timerElement.className = "timer-container";
+  timerElement.id = `timer-${timer.id}`;
 
-resetButton.addEventListener("click", function () {
-  clearInterval(timer);
-  timeLeft = 0;
-  display.textContent = "00:00:00";
-  if (chrome.storage) {
-    chrome.storage.local.set({ timeLeft: 0, isRunning: false });
-  }
-});
+  timerElement.innerHTML = `
+        <p id="display-${timer.id}" class="time">${formatTime(
+    timer.timeLeft
+  )}</p>
+        <div class="timer-controls">
+            <img src="icons/pause.png" height="22" width="22" class="playPause" id="pause-${
+              timer.id
+            }" />
+            <img src="icons/play.png" height="22" width="22" class="playPause" id="play-${
+              timer.id
+            }" style="display: none;" />
+            <img src="icons/cancel.png" height="22" width="22" class="playPause" id="cancel-${
+              timer.id
+            }" />
+        </div>
+    `;
 
-function updateTimer() {
-  if (timeLeft <= 0) {
-    clearInterval(timer);
-    display.textContent = "00:00:00";
-    alert("Time is up!");
-    if (chrome.storage) {
-      chrome.storage.local.set({ timeLeft: 0, isRunning: false });
-    }
-  } else {
-    timeLeft--;
-    const hours = Math.floor(timeLeft / 3600);
-    const minutes = Math.floor((timeLeft % 3600) / 60);
-    const seconds = timeLeft % 60;
-    display.textContent = `${hours.toString().padStart(2, "0")}:${minutes
-      .toString()
-      .padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
-    if (chrome.storage) {
-      chrome.storage.local.set({ timeLeft: timeLeft });
-    }
-  }
+  timersContainer.appendChild(timerElement);
+
+  document
+    .getElementById(`pause-${timer.id}`)
+    .addEventListener("click", function () {
+      pauseTimer(timer);
+    });
+
+  document
+    .getElementById(`play-${timer.id}`)
+    .addEventListener("click", function () {
+      playTimer(timer);
+    });
+
+  document
+    .getElementById(`cancel-${timer.id}`)
+    .addEventListener("click", function () {
+      cancelTimer(timer);
+    });
 }
 
-if (chrome.storage) {
-  chrome.storage.local.get(["timeLeft", "isRunning"], function (result) {
-    if (result.timeLeft) {
-      timeLeft = result.timeLeft;
-      const hours = Math.floor(timeLeft / 3600);
-      const minutes = Math.floor((timeLeft % 3600) / 60);
-      const seconds = timeLeft % 60;
-      display.textContent = `${hours.toString().padStart(2, "0")}:${minutes
-        .toString()
-        .padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
-      if (result.isRunning) {
-        timer = setInterval(updateTimer, 1000);
-      }
+function startTimer(timer) {
+  timer.interval = setInterval(function () {
+    if (timer.timeLeft <= 0) {
+      clearInterval(timer.interval);
+      document.getElementById(`display-${timer.id}`).textContent = "00:00:00";
+      alert("Time is up!");
+    } else {
+      timer.timeLeft--;
+      document.getElementById(`display-${timer.id}`).textContent = formatTime(
+        timer.timeLeft
+      );
+    }
+    saveTimers();
+  }, 1000);
+}
+
+function pauseTimer(timer) {
+  clearInterval(timer.interval);
+  timer.isRunning = false;
+  document.getElementById(`pause-${timer.id}`).style.display = "none";
+  document.getElementById(`play-${timer.id}`).style.display = "inline";
+  saveTimers();
+}
+
+function playTimer(timer) {
+  startTimer(timer);
+  timer.isRunning = true;
+  document.getElementById(`pause-${timer.id}`).style.display = "inline";
+  document.getElementById(`play-${timer.id}`).style.display = "none";
+  saveTimers();
+}
+
+function cancelTimer(timer) {
+  clearInterval(timer.interval);
+  document.getElementById(`timer-${timer.id}`).remove();
+  timers = timers.filter((t) => t.id !== timer.id);
+  saveTimers();
+}
+
+function formatTime(seconds) {
+  const hours = Math.floor(seconds / 3600);
+  const minutes = Math.floor((seconds % 3600) / 60);
+  const secs = seconds % 60;
+  return `${hours.toString().padStart(2, "0")}:${minutes
+    .toString()
+    .padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
+}
+
+function saveTimers() {
+  chrome.storage.local.set({ timers: timers });
+}
+
+function loadTimers() {
+  chrome.storage.local.get("timers", (result) => {
+    if (result.timers) {
+      timers = Array.isArray(result.timers) ? result.timers : [];
+      timers.forEach((timer) => {
+        renderTimer(timer);
+        if (timer.isRunning) {
+          startTimer(timer);
+        }
+      });
     }
   });
 }
+
+document.addEventListener("DOMContentLoaded", loadTimers);

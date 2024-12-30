@@ -1,7 +1,29 @@
+@font-face {
+    font-family: 'Pacifico';
+    src: url('fonts/Pacifico-Regular.ttf');
+}
+
+@font-face {
+    font-family: 'SignikaNegative';
+    src: url('fonts/SignikaNegative-VariableFont_wght.ttf');
+}
+
 .ext-heading {
-    font-weight: 600;
+    font-weight:bolder;
     font-size: 20px;
     text-align: center;
+}
+
+.time{
+    font-family: 'Pacifico', cursive;
+    font-size: 32px;
+    margin-right: 18px;
+}
+
+.playPause{
+    margin-top: 4px;
+    margin-left: 2px;
+    margin-right: 2px;
 }
 
 .theme {
@@ -9,7 +31,7 @@
 }
 
 body {
-    font-family: "Lato", serif;
+    font-family: "SignikaNegative", sans-serif;
     font-weight:bold;
     font-style: normal;
     font-size: 15px;
