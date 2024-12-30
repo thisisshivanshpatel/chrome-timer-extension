@@ -14,10 +14,9 @@
 
         .timer-container {
             display: flex;
-            align-items: center;
             justify-content: space-around;
             width: 100%;
-            margin-top: 10px;
+            margin-top: 2px;
         }
 
         .timer-controls {
@@ -64,12 +63,14 @@
             <div style="display: flex;justify-content: center;">
                 <img class="clock" src="clock.png" height="200px" width="200px" />
             </div>
-
-            <input type="number" id="hours" placeholder="H" style="max-width: 40px;">
-            <input type="number" id="minutes" placeholder="M" style="max-width: 40px;">
-            <input type="number" id="seconds" placeholder="S" style="max-width: 40px;">
-
-            <button id="start">Start</button>
+            <div style="display: flex; justify-content: space-around;">
+                <input type="number" class="input" min="0" max="60" id="hours" placeholder="H">
+                <input type="number" class="input" min="0" max="60" id="minutes" placeholder="M">
+                <input type="number" class="input" min="0" max="60" id="seconds" placeholder="S">
+                <div style="display: flex;justify-content: center; align-items: center;">
+                    <button id="start" style="margin-top: 3px;">Start</button>
+                </div>
+            </div>
 
             <div id="timers"></div>
         </div>
