@@ -86,8 +86,9 @@ document.addEventListener("DOMContentLoaded", function () {
     timer.interval = setInterval(function () {
       if (timer.timeLeft <= 0) {
         clearInterval(timer.interval);
-        document.getElementById(`display-${timer.id}`).textContent = "00:00:00";
-        cancelTimer(timer);
+        document.getElementById(`timer-${timer.id}`).remove();
+        timers = timers.filter((t) => t.id !== timer.id);
+        saveTimers();
         alert("Time is up!");
       } else {
         timer.timeLeft--;
