@@ -43,6 +43,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const timerElement = document.createElement("div");
     timerElement.className = "timer-container";
     timerElement.id = `timer-${timer.id}`;
+    timerElement.style.maxHeight = "50px";
 
     timerElement.innerHTML = `
         <p id="display-${timer.id}" class="time">${formatTime(
