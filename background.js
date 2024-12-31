@@ -15,6 +15,13 @@ chrome.storage.onChanged.addListener((changes, namespace) => {
         delete timers[id];
       }
     }
+    // Remove any timers that are no longer in the newTimers object
+    for (const id in timers) {
+      if (!newTimers[id]) {
+        clearInterval(timers[id].interval);
+        delete timers[id];
+      }
+    }
   }
 });
 
