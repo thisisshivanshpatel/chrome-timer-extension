@@ -90,7 +90,6 @@ document.addEventListener("DOMContentLoaded", function () {
         document.getElementById(`timer-${timer.id}`).remove();
         timers = timers.filter((t) => t.id !== timer.id);
         saveTimers();
-        alert("Time is up!");
       } else {
         timer.timeLeft--;
         document.getElementById(`display-${timer.id}`).textContent = formatTime(
