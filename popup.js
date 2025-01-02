@@ -27,7 +27,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     if (hours || minutes || seconds) {
       const timeLeft = hours * 3600 + minutes * 60 + seconds;
-      const timerId = timers.length;
+      const timerId = new Date().getTime();
 
       const timer = {
         id: timerId,
