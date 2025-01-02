@@ -4,6 +4,10 @@ document.addEventListener("DOMContentLoaded", function () {
   const startButton = document.getElementById("start");
   const timersContainer = document.getElementById("timers");
 
+  const audio = new Audio("sounds/clockSound.mp3");
+  const unPauseOrCancel = new Audio("sounds/unpauseSound.mp3");
+  const cancelSound = new Audio("sounds/cancelSound.mp3");
+
   startButton.addEventListener("click", function () {
     const hours = parseInt(document.getElementById("hours")?.value) || 0;
     const minutes = parseInt(document.getElementById("minutes")?.value) || 0;
@@ -36,6 +40,8 @@ document.addEventListener("DOMContentLoaded", function () {
       saveTimers();
       renderTimer(timer);
       startTimer(timer);
+
+      audio.play();
     }
   });
 
@@ -90,6 +96,7 @@ document.addEventListener("DOMContentLoaded", function () {
         document.getElementById(`timer-${timer.id}`).remove();
         timers = timers.filter((t) => t.id !== timer.id);
         saveTimers();
+        cancelSound.play();
       } else {
         timer.timeLeft--;
         document.getElementById(`display-${timer.id}`).textContent = formatTime(
@@ -106,6 +113,7 @@ document.addEventListener("DOMContentLoaded", function () {
     document.getElementById(`pause-${timer.id}`).style.display = "none";
     document.getElementById(`play-${timer.id}`).style.display = "inline";
     saveTimers();
+    unPauseOrCancel.play();
   }
 
   function playTimer(timer) {
@@ -114,6 +122,7 @@ document.addEventListener("DOMContentLoaded", function () {
     document.getElementById(`pause-${timer.id}`).style.display = "inline";
     document.getElementById(`play-${timer.id}`).style.display = "none";
     saveTimers();
+    audio.play();
   }
 
   function cancelTimer(timer) {
@@ -121,6 +130,7 @@ document.addEventListener("DOMContentLoaded", function () {
     document.getElementById(`timer-${timer.id}`).remove();
     timers = timers.filter((t) => t.id !== timer.id);
     saveTimers();
+    cancelSound.play();
   }
 
   function formatTime(seconds) {
