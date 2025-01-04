@@ -1,57 +1,92 @@
-let timers = {};
+let timers = [];
+let isPopupOpen = false;
 
 chrome.runtime.onInstalled.addListener(() => {
-  chrome.storage.local.set({ timers: {} });
+  // initialize the timers array
+  chrome.storage.local.set({ timers: timers });
 });
 
-chrome.storage.onChanged.addListener((changes, namespace) => {
-  if (changes.timers) {
-    const newTimers = changes.timers.newValue;
-    for (const id in newTimers) {
-      if (newTimers[id].isRunning && !timers[id]) {
-        startBackgroundTimer(id, newTimers[id].timeLeft);
-      } else if (!newTimers[id].isRunning && timers[id]) {
-        clearInterval(timers[id].interval);
-        delete timers[id];
-      }
+// Load the timers from local storage
+// chrome.storage.local.get("timers", (result) => {
+//   timers = result.timers || [];
+// });
+
+chrome.runtime.onConnect.addListener((port) => {
+  if (port.name === "popup-open") {
+    isPopupOpen = true;
+
+    // Listen for popup disconnect
+    port.onDisconnect.addListener(() => {
+      isPopupOpen = false;
+    });
+  }
+});
+
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+  switch (request.action) {
+    case "setTimer": {
+      // pushing the timer to the timers array
+      timers.push(request.data);
+      // Save the timers array to local
+      saveTimers();
+
+      //start the timer
+      startTimer(request.data);
+      break;
     }
-    // Remove any timers that are no longer in the newTimers object
-    for (const id in timers) {
-      if (!newTimers[id]) {
-        clearInterval(timers[id].interval);
-        delete timers[id];
+    case "removeTimer": {
+      const timer = timers.find((t) => t.id === request.data.id);
+
+      if (timer?.interval) {
+        clearInterval(timer.interval);
       }
+      timers = timers.filter((t) => t.id !== request.data.id);
+      saveTimers();
+      break;
+    }
+    case "playTimer": {
+      const timer = timers.find((t) => t.id === request.data.id);
+      timer.isRunning = true;
+
+      startTimer(timer);
+      break;
+    }
+    case "pauseTimer": {
+      const timer = timers.find((t) => t.id === request.data.id);
+      clearInterval(timer.interval);
+      timer.isRunning = false;
+      saveTimers();
+      break;
+    }
+    default: {
+      break;
     }
   }
 });
 
-function startBackgroundTimer(id, timeLeft) {
-  timers[id] = {
-    timeLeft: timeLeft,
-    interval: setInterval(() => updateTimer(id), 1000),
-  };
+function startTimer(timer) {
+  timer.interval = setInterval(function () {
+    if (timer.timeLeft <= 0) {
+      clearInterval(timer.interval);
+
+      if (isPopupOpen) {
+        chrome.runtime.sendMessage({
+          action: "removeTimerFromDom",
+          data: {
+            timer: timer,
+          },
+        });
+      }
+
+      timers = timers.filter((t) => t.id !== timer.id);
+      saveTimers();
+    } else {
+      timer.timeLeft--;
+    }
+    saveTimers();
+  }, 1000);
 }
 
-function updateTimer(id) {
-  if (timers[id].timeLeft <= 0) {
-    clearInterval(timers[id].interval);
-    delete timers[id];
-    chrome.storage.local.get("timers", (result) => {
-      const updatedTimers = result.timers;
-      if (updatedTimers[id]) {
-        updatedTimers[id].timeLeft = 0;
-        updatedTimers[id].isRunning = false;
-        chrome.storage.local.set({ timers: updatedTimers });
-      }
-    });
-  } else {
-    timers[id].timeLeft--;
-    chrome.storage.local.get("timers", (result) => {
-      const updatedTimers = result.timers;
-      if (updatedTimers[id]) {
-        updatedTimers[id].timeLeft = timers[id].timeLeft;
-        chrome.storage.local.set({ timers: updatedTimers });
-      }
-    });
-  }
+function saveTimers() {
+  chrome.storage.local.set({ timers: timers });
 }

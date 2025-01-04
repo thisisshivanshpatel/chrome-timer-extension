@@ -1,4 +1,4 @@
-let timers = [];
+chrome.runtime.connect({ name: "popup-open" });
 
 document.addEventListener("DOMContentLoaded", function () {
   const startButton = document.getElementById("start");
@@ -36,15 +36,14 @@ document.addEventListener("DOMContentLoaded", function () {
         isRunning: true,
       };
 
-      timers.push(timer);
-      saveTimers();
+      sendMessage("setTimer", timer);
       renderTimer(timer);
-      startTimer(timer);
 
       audio.play();
     }
   });
 
+  /** used for rendering timers to dom */
   function renderTimer(timer) {
     const timerElement = document.createElement("div");
     timerElement.className = "timer-container";
@@ -58,10 +57,10 @@ document.addEventListener("DOMContentLoaded", function () {
         <div class="timer-controls">
             <img src="icons/pause.png" height="22" width="22" class="playPause" id="pause-${
               timer.id
-            }" />
+            }" style="display:${timer?.isRunning ? "" : "none"};"/>
             <img src="icons/play.png" height="22" width="22" class="playPause" id="play-${
               timer.id
-            }" style="display: none;" />
+            }" style="display:${timer?.isRunning ? "none" : ""};" />
             <img src="icons/cancel.png" height="22" width="22" class="playPause" id="cancel-${
               timer.id
             }" />
@@ -89,50 +88,27 @@ document.addEventListener("DOMContentLoaded", function () {
       });
   }
 
-  function startTimer(timer) {
-    timer.interval = setInterval(function () {
-      if (timer.timeLeft <= 0) {
-        clearInterval(timer.interval);
-        document.getElementById(`timer-${timer.id}`).remove();
-        timers = timers.filter((t) => t.id !== timer.id);
-        saveTimers();
-        cancelSound.play();
-      } else {
-        timer.timeLeft--;
-        document.getElementById(`display-${timer.id}`).textContent = formatTime(
-          timer.timeLeft
-        );
-      }
-      saveTimers();
-    }, 1000);
-  }
-
   function pauseTimer(timer) {
-    clearInterval(timer.interval);
-    timer.isRunning = false;
+    sendMessage("pauseTimer", timer);
     document.getElementById(`pause-${timer.id}`).style.display = "none";
     document.getElementById(`play-${timer.id}`).style.display = "inline";
-    saveTimers();
     unPauseOrCancel.play();
   }
 
   function playTimer(timer) {
-    startTimer(timer);
-    timer.isRunning = true;
+    sendMessage("playTimer", timer);
     document.getElementById(`pause-${timer.id}`).style.display = "inline";
     document.getElementById(`play-${timer.id}`).style.display = "none";
-    saveTimers();
     audio.play();
   }
 
   function cancelTimer(timer) {
-    clearInterval(timer.interval);
     document.getElementById(`timer-${timer.id}`).remove();
-    timers = timers.filter((t) => t.id !== timer.id);
-    saveTimers();
+    sendMessage("removeTimer", timer);
     cancelSound.play();
   }
 
+  /** method used for returning formatted time */
   function formatTime(seconds) {
     const hours = Math.floor(seconds / 3600);
     const minutes = Math.floor((seconds % 3600) / 60);
@@ -145,9 +121,37 @@ document.addEventListener("DOMContentLoaded", function () {
       )}:${minutes.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
   }
 
-  function saveTimers() {
-    chrome.storage.local.set({ timers: timers });
+  /** used for inserting time to dom */
+  function updateTimerInDom(timer) {
+    document.getElementById(`display-${timer.id}`).textContent = formatTime(
+      timer.timeLeft
+    );
   }
+
+  /** used for removing timer from dom */
+  function removeTimerFromDom(timer) {
+    document.getElementById(`timer-${timer.id}`).remove();
+    cancelSound.play();
+  }
+
+  // for constantly updating the time in dom
+  chrome.storage.onChanged.addListener((changes) => {
+    if (changes.timers) {
+      const newTimers = changes.timers.newValue;
+
+      for (const timer of newTimers) {
+        if (timer?.isRunning) {
+          updateTimerInDom(timer);
+        }
+      }
+    }
+  });
+
+  chrome.runtime.onMessage.addListener((request) => {
+    if (request.action === "removeTimerFromDom") {
+      removeTimerFromDom(request.data.timer);
+    }
+  });
 
   function loadTimers() {
     chrome.storage.local.get("timers", (result) => {
@@ -155,12 +159,23 @@ document.addEventListener("DOMContentLoaded", function () {
         timers = Array.isArray(result.timers) ? result.timers : [];
         timers.forEach((timer) => {
           renderTimer(timer);
-          if (timer.isRunning) {
-            startTimer(timer);
-          }
         });
       }
     });
+  }
+
+  function sendMessage(action, data) {
+    chrome.runtime.sendMessage(
+      {
+        action: action,
+        data: {
+          ...data,
+        },
+      }
+      // (response) => {
+      //   console.log("Response from background script:", response);
+      // }
+    );
   }
 
   loadTimers();
