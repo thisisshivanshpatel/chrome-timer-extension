@@ -27,13 +27,14 @@ document.addEventListener("DOMContentLoaded", function () {
 
     if (hours || minutes || seconds) {
       const timeLeft = hours * 3600 + minutes * 60 + seconds;
-      const timerId = new Date().getTime();
+      const timerId = Date.now();
 
       const timer = {
         id: timerId,
         timeLeft: timeLeft,
         interval: null,
         isRunning: true,
+        lastUpdatedAt: Date.now(),
       };
 
       sendMessage("setTimer", timer);
@@ -130,7 +131,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
   /** used for removing timer from dom */
   function removeTimerFromDom(timer) {
-    document.getElementById(`timer-${timer.id}`).remove();
+    document?.getElementById(`timer-${timer.id}`)?.remove();
     cancelSound.play();
   }
 
@@ -156,14 +157,20 @@ document.addEventListener("DOMContentLoaded", function () {
   function loadTimers() {
     chrome.storage.local.get("timers", (result) => {
       if (result.timers) {
-        timers = Array.isArray(result.timers) ? result.timers : [];
-        timers.forEach((timer) => {
+        const timers = Array.isArray(result.timers) ? result.timers : [];
+
+        for (const timer of timers) {
+          const difference = Date.now() - timer.lastUpdatedAt;
+          if (difference >= 10000 && timer.isRunning) {
+            sendMessage("playTimer", timer);
+          }
           renderTimer(timer);
-        });
+        }
       }
     });
   }
 
+  /** used for sending message to background script */
   function sendMessage(action, data) {
     chrome.runtime.sendMessage(
       {

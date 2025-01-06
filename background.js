@@ -7,9 +7,9 @@ chrome.runtime.onInstalled.addListener(() => {
 });
 
 // Load the timers from local storage
-// chrome.storage.local.get("timers", (result) => {
-//   timers = result.timers || [];
-// });
+chrome.storage.local.get("timers", (result) => {
+  timers = result.timers || [];
+});
 
 chrome.runtime.onConnect.addListener((port) => {
   if (port.name === "popup-open") {
@@ -22,7 +22,18 @@ chrome.runtime.onConnect.addListener((port) => {
   }
 });
 
+// on browser closing
+// chrome.runtime.onSuspend.addListener(() => {
+//   return new Promise((resolve) => {
+//     chrome.storage.local.set({ timers: [] }, () => {
+//       resolve();
+//     });
+//   });
+// });
+
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+  const timer = timers?.find((t) => t?.id === request?.data?.id);
+
   switch (request.action) {
     case "setTimer": {
       // pushing the timer to the timers array
@@ -35,8 +46,6 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       break;
     }
     case "removeTimer": {
-      const timer = timers.find((t) => t.id === request.data.id);
-
       if (timer?.interval) {
         clearInterval(timer.interval);
       }
@@ -45,14 +54,12 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       break;
     }
     case "playTimer": {
-      const timer = timers.find((t) => t.id === request.data.id);
       timer.isRunning = true;
 
       startTimer(timer);
       break;
     }
     case "pauseTimer": {
-      const timer = timers.find((t) => t.id === request.data.id);
       clearInterval(timer.interval);
       timer.isRunning = false;
       saveTimers();
@@ -82,6 +89,7 @@ function startTimer(timer) {
       saveTimers();
     } else {
       timer.timeLeft--;
+      timer.lastUpdatedAt = Date.now();
     }
     saveTimers();
   }, 1000);
