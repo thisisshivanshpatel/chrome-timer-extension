@@ -31,6 +31,12 @@ This project is a simple Chrome extension that provides a timer functionality. I
 
 Contributions are welcome! Please open an issue or submit a pull request.
 
+## Next Feature targets
+
+1. Timer completion Notification
+2. snooze feature
+3. Adding Time spent on sites tracking feature
+
 ## License
 
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
