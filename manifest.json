@@ -14,17 +14,8 @@
     "background": {
         "service_worker": "background.js"
     },
-    "content_scripts": [
-        {
-            "js": [
-                "popup.js"
-            ],
-            "matches": [
-                "<all_urls>"
-            ]
-        }
-    ],
     "permissions": [
-        "storage"
+        "storage",
+        "activeTab"
     ]
 }
