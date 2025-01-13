@@ -15,6 +15,9 @@
         "service_worker": "background.js"
     },
     "permissions": [
-        "storage"
+        "storage",
+        "activeTab",
+        "notifications",
+        "offscreen"
     ]
 }

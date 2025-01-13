@@ -71,6 +71,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   }
 });
 
+/** used for starting the timer */
 function startTimer(timer) {
   timer.interval = setInterval(function () {
     if (timer.timeLeft <= 0) {
@@ -87,6 +88,8 @@ function startTimer(timer) {
 
       timers = timers.filter((t) => t.id !== timer.id);
       saveTimers();
+      backGroundAudio()
+      displayNotification();
     } else {
       timer.timeLeft--;
       timer.lastUpdatedAt = Date.now();
@@ -95,6 +98,31 @@ function startTimer(timer) {
   }, 1000);
 }
 
+/** used for saving the data in extensions local storage */
 function saveTimers() {
   chrome.storage.local.set({ timers: timers });
+}
+
+
+// notification
+
+/** used for displaying notification */
+function displayNotification() {
+  const notificationOptions = {
+    type: "basic",
+    title: "Timer For Focus",
+    message: "Time Up",
+    iconUrl: "icons/clock128.png"
+  };
+
+  chrome.notifications.create(null, notificationOptions);
+}
+
+/** used for playing audio */
+function backGroundAudio() {
+  chrome.offscreen.createDocument({
+    url: chrome.runtime.getURL('audio.html'),
+    reasons: ['AUDIO_PLAYBACK'],
+    justification: 'notification'
+  });
 }
