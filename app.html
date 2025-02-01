@@ -64,16 +64,48 @@
             <div style="display: flex;justify-content: center;">
                 <img class="clock" src="icons/clock.png" height="200px" width="200px" />
             </div>
-            <div style="display: flex; justify-content: space-around;margin-top: 10px;">
-                <input type="number" class="input" min="0" max="60" id="hours" placeholder="H">
-                <input type="number" class="input" min="0" max="60" id="minutes" placeholder="M">
-                <input type="number" class="input" min="0" max="60" id="seconds" placeholder="S">
+
+            <div id="button-block">
                 <div style="display: flex;justify-content: center; align-items: center;">
-                    <button id="start" style="margin-top: 3px;">Start</button>
+                    <button id="start" style="margin-top: 3px;">
+                        Set a Timer
+                    </button>
+                </div>
+
+                <div style="display: flex;justify-content: center; align-items: center;">
+                    <button id="start" style="margin-top: 3px;">Pomodoro Timer
+                    </button>
                 </div>
             </div>
+            <div id="entry-block">
+                <div style="display: flex; justify-content: space-around;margin-top: 10px;">
+                    <input type="number" class="input" min="0" max="60" id="hours" placeholder="H">
+                    <input type="number" class="input" min="0" max="60" id="minutes" placeholder="M">
+                    <input type="number" class="input" min="0" max="60" id="seconds" placeholder="S">
+                    <div style="display: flex;justify-content: center; align-items: center;">
+                        <button id="start" style="margin-top: 3px;">Start</button>
+                    </div>
+                </div>
 
-            <div id="timers"></div>
+                <div id="timers"></div>
+            </div>
+
+            <div id="pomodoro-block" class="pomodoro">
+                <div class="pomodoro-inner-block">
+                    <label for="default-range" class="range-label">Focus Time Length</label>
+                    <input id="focus-time" type="range" min="1" max="100" value="25" class="range-input">
+                </div>
+
+                <div class="pomodoro-inner-block">
+                    <label for="default-range" class="range-label">Break Time Length</label>
+                    <input id="break-time" type="range" min="1" max="25" value="5" class="range-input">
+                </div>
+
+                <div class="pomodoro-inner-block">
+                    <label for="default-range" class="range-label">Session Time Length</label>
+                    <input id="session-time" type="range" min="1" max="10" value="4" class="range-input">
+                </div>
+            </div>
         </div>
 
         <footer>
