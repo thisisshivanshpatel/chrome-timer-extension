@@ -1,6 +1,6 @@
 # Chrome Timer Extension
 
-![alt text](image.png)
+![alt text](public/icons/clock.png)
 
 This project is a simple Chrome extension that provides a timer functionality. It allows users to set a timer and receive notifications when the time is up.
 
