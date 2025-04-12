@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import "./output.css";
 import { Pomodoro } from "./Pomodoro";
-import { IoMdArrowRoundBack } from "react-icons/io";
+import { IoLogoLinkedin, IoMdArrowRoundBack } from "react-icons/io";
 
 export type Timer = {
   id: number;
@@ -342,7 +342,10 @@ const MyComponent = () => {
           target="_blank"
           rel="noopener noreferrer"
         >
-          <h5>created by Shivansh Patel</h5>
+          <h5 className="flex items-center justify-center gap-1">
+            <IoLogoLinkedin />
+            <span>created by Shivansh Patel</span>
+          </h5>
         </a>
       </footer>
     </>
