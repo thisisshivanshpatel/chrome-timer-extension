@@ -1,3 +1,16 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body,
+html {
+  height: 600px;
+  width: 300px;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+}
+
 @font-face {
   font-family: 'Pacifico';
   src: url('../fonts/Pacifico-Regular.ttf');
@@ -6,6 +19,14 @@
 @font-face {
   font-family: 'SignikaNegative';
   src: url('../fonts/SignikaNegative-VariableFont_wght.ttf');
+}
+
+@layer components {
+  .button {
+    @apply text-white bg-[#8B5DFF] rounded-2xl font-['SignikaNegative'] 
+    text-sm px-5 py-2.5 mb-2 font-medium border-none 
+    hover:opacity-80;
+  }
 }
 
 .flex-container {
@@ -30,15 +51,6 @@
 
 .playPause {
   cursor: pointer;
-}
-
-body,
-html {
-  height: 500px;
-  width: 300px;
-  margin: 0;
-  display: flex;
-  flex-direction: column;
 }
 
 .main-container {
@@ -97,7 +109,7 @@ body {
 
 .input {
   display: inline-block;
-  max-width: 40px;
+  min-width: 40px;
   padding: 10px; 
   color: #111827; /* Gray-900 */
   border: 1px solid #d1d5db; /* Gray-300 */
@@ -127,22 +139,6 @@ body {
   }
 }
 
-button {
-  color: #fff; /* text-white */
-  background-color: #8B5DFF;; /* bg-purple-700 */
-  border-radius: 16px; /* rounded-lg */
-  font-family: "SignikaNegative", sans-serif;
-  font-size: 0.8125rem; /* text-sm */
-  padding: 0.625rem 1.25rem; /* px-5 py-2.5 */
-  margin-bottom: 0.5rem; /* mb-2 */
-  font-weight: 500; /* font-medium */
-  border: none;
-
-  &:hover {
-    opacity: 0.8;
-  }
-}
-
 .clock:hover {
   animation: shake 0.5s;
   animation-iteration-count: infinite;
@@ -153,12 +149,12 @@ display: block;
 }
 
 #button-block{
-  height: 30%;
+  height: 20%;
   display: flex;
   justify-content: center;
   flex-direction: column;
   align-items: center;
-  margin-top: 40px;
+  margin-top: 30px;
 }
 
 .pomodoro{

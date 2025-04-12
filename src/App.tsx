@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
-import "./App.css";
+import "./output.css";
+import { Pomodoro } from "./Pomodoro";
+import { IoMdArrowRoundBack } from "react-icons/io";
 
 export type Timer = {
   id: number;
@@ -10,7 +12,8 @@ export type Timer = {
 };
 
 const MyComponent = () => {
-  const [showTimerBlock] = useState<boolean>(true);
+  const [showTimerBlock, setShowTimerBlock] = useState<boolean>(false);
+  const [showPomodoroBlock, setShowPomodoroBlock] = useState<boolean>(false);
   const [hours, setHours] = useState<number>(0);
   const [minutes, setMinutes] = useState<number>(0);
   const [seconds, setSeconds] = useState<number>(0);
@@ -175,7 +178,7 @@ const MyComponent = () => {
             />
           </div>
 
-          {/* {!showTimerBlock && (
+          {!showTimerBlock && !showPomodoroBlock && (
             <div id="button-block">
               <div
                 style={{
@@ -185,6 +188,7 @@ const MyComponent = () => {
                 }}
               >
                 <button
+                  className="button"
                   id="start"
                   style={{ marginTop: "3px" }}
                   onClick={() => setShowTimerBlock((prev) => !prev)}
@@ -200,15 +204,24 @@ const MyComponent = () => {
                   alignItems: "center",
                 }}
               >
-                <button id="pomodoro" style={{ marginTop: "3px" }}>
+                <button
+                  id="pomodoro"
+                  className="button"
+                  style={{ marginTop: "3px" }}
+                  onClick={() => setShowPomodoroBlock(true)}
+                >
                   Pomodoro Timer
                 </button>
               </div>
             </div>
-          )} */}
+          )}
 
           {showTimerBlock && (
             <div id="entry-block">
+              <IoMdArrowRoundBack
+                onClick={() => setShowTimerBlock((prev) => !prev)}
+                cursor={"pointer"}
+              />
               <div
                 style={{
                   display: "flex",
@@ -255,6 +268,7 @@ const MyComponent = () => {
                 >
                   <button
                     id="start"
+                    className="button"
                     style={{ marginTop: "3px" }}
                     onClick={() => handleStartTimer()}
                   >
@@ -267,57 +281,62 @@ const MyComponent = () => {
             </div>
           )}
 
-          <div className="timers">
-            {runningTimersArray?.map((timer) => (
-              <div
-                id={`${timer.id}`}
-                className="timer-container"
-                style={{ maxHeight: 50 }}
-              >
-                <p id="display-${timer.id}" className="time">
-                  {formatTime(timer.timeLeft)}
-                </p>
-                <div className="timer-controls">
-                  <img
-                    src="icons/pause.png"
-                    height="22"
-                    width="22"
-                    className="playPause"
-                    id={`pause-${timer.id}`}
-                    style={{ display: timer?.isRunning ? "" : "none" }}
-                    onClick={() => {
-                      pauseTimer(timer);
-                    }}
-                  />
-                  <img
-                    src="icons/play.png"
-                    height="22"
-                    width="22"
-                    className="playPause"
-                    id={`play-${timer.id}`}
-                    style={{ display: timer?.isRunning ? "none" : "" }}
-                    onClick={() => {
-                      playTimer(timer);
-                    }}
-                  />
-                  <img
-                    src="icons/cancel.png"
-                    height="22"
-                    width="22"
-                    className="playPause"
-                    id={`cancel-${timer.id}`}
-                    onClick={() => {
-                      removeTimerFromDom(timer, true);
-                    }}
-                  />
+          {showPomodoroBlock && (
+            <Pomodoro goBack={() => setShowPomodoroBlock((prev) => !prev)} />
+          )}
+
+          {runningTimersArray?.length > 0 && (
+            <div className="timers">
+              {runningTimersArray?.map((timer) => (
+                <div
+                  id={`${timer.id}`}
+                  className="timer-container"
+                  style={{ maxHeight: 50 }}
+                >
+                  <p id="display-${timer.id}" className="time">
+                    {formatTime(timer.timeLeft)}
+                  </p>
+                  <div className="timer-controls">
+                    <img
+                      src="icons/pause.png"
+                      height="22"
+                      width="22"
+                      className="playPause"
+                      id={`pause-${timer.id}`}
+                      style={{ display: timer?.isRunning ? "" : "none" }}
+                      onClick={() => {
+                        pauseTimer(timer);
+                      }}
+                    />
+                    <img
+                      src="icons/play.png"
+                      height="22"
+                      width="22"
+                      className="playPause"
+                      id={`play-${timer.id}`}
+                      style={{ display: timer?.isRunning ? "none" : "" }}
+                      onClick={() => {
+                        playTimer(timer);
+                      }}
+                    />
+                    <img
+                      src="icons/cancel.png"
+                      height="22"
+                      width="22"
+                      className="playPause"
+                      id={`cancel-${timer.id}`}
+                      onClick={() => {
+                        removeTimerFromDom(timer, true);
+                      }}
+                    />
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
-
-      <footer>
+      <footer className="text-center">
         <a
           href="https://www.linkedin.com/in/shivansh-patel-4915b4171/"
           target="_blank"
