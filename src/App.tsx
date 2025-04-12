@@ -164,7 +164,7 @@ const MyComponent = () => {
 
   return (
     <>
-      <div className="main-container">
+      <div className="main-container mb-10">
         <div className="content">
           <p className="ext-heading theme">Timer for Focus</p>
 
@@ -285,7 +285,7 @@ const MyComponent = () => {
             <Pomodoro goBack={() => setShowPomodoroBlock((prev) => !prev)} />
           )}
 
-          {runningTimersArray?.length > 0 && (
+          {runningTimersArray?.length > 0 && !showPomodoroBlock && (
             <div className="timers">
               {runningTimersArray?.map((timer) => (
                 <div
@@ -336,7 +336,7 @@ const MyComponent = () => {
           )}
         </div>
       </div>
-      <footer className="text-center">
+      <footer className="fixed bottom-0 left-0 w-full bg-[#EBEAFF] py-2 text-center">
         <a
           href="https://www.linkedin.com/in/shivansh-patel-4915b4171/"
           target="_blank"
