@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import "./output.css";
 import { Pomodoro } from "./Pomodoro";
 import { IoLogoLinkedin, IoMdArrowRoundBack } from "react-icons/io";
+import { TimerActions } from "./types";
 
 export type Timer = {
   id: number;
@@ -46,7 +47,7 @@ const MyComponent = () => {
         setRunningTimersArray([timer]);
       }
 
-      sendMessage("setTimer", timer);
+      sendMessage(TimerActions.SET_TIMER, timer);
       audio.play();
 
       setHours(0);
@@ -65,19 +66,19 @@ const MyComponent = () => {
     cancelSound.play();
 
     if (fromUI) {
-      sendMessage("removeTimer", timer);
+      sendMessage(TimerActions.REMOVE_TIMER, timer);
     }
   }
 
   /** method used for pausing a timer */
   function pauseTimer(timer: Timer) {
-    sendMessage("pauseTimer", timer);
+    sendMessage(TimerActions.PAUSE_TIMER, timer);
     unPauseOrCancel.play();
   }
 
   /** method used for playing a timer */
   function playTimer(timer: Timer) {
-    sendMessage("playTimer", timer);
+    sendMessage(TimerActions.PLAY_TIMER, timer);
     audio.play();
   }
 
@@ -114,7 +115,7 @@ const MyComponent = () => {
         for (const timer of timers) {
           const difference = Date.now() - timer.lastUpdatedAt;
           if (difference >= 10000 && timer.isRunning) {
-            sendMessage("playTimer", timer);
+            sendMessage(TimerActions.PLAY_TIMER, timer);
           }
           if (runningTimersArray?.length > 0) {
             setRunningTimersArray((prev) => [...prev, timer]);

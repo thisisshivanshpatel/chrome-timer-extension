@@ -1,4 +1,5 @@
 import { Timer } from "./App";
+import { TimerActions } from "./types";
 
 let timers: Timer[];
 let isPopupOpen = false;
@@ -38,7 +39,7 @@ chrome.runtime.onMessage.addListener(
     const timer = timers?.find((t) => t?.id === request?.data?.id);
 
     switch (request.action) {
-      case "setTimer": {
+      case TimerActions.SET_TIMER: {
         // pushing the timer to the timers array
         timers.push(request.data);
         // Save the timers array to local
@@ -48,7 +49,7 @@ chrome.runtime.onMessage.addListener(
         startTimer(request.data);
         break;
       }
-      case "removeTimer": {
+      case TimerActions.REMOVE_TIMER: {
         if (timer?.interval) {
           clearInterval(timer.interval);
         }
@@ -56,14 +57,14 @@ chrome.runtime.onMessage.addListener(
         saveTimers();
         break;
       }
-      case "playTimer": {
+      case TimerActions.PLAY_TIMER: {
         if (timer) {
           timer.isRunning = true;
           startTimer(timer);
         }
         break;
       }
-      case "pauseTimer": {
+      case TimerActions.PAUSE_TIMER: {
         if (timer) {
           clearInterval(timer.interval);
           timer.isRunning = false;
