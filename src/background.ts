@@ -1,5 +1,4 @@
-import { Timer } from "./App";
-import { TimerActions } from "./types";
+import { Timer, TimerActions } from "./types";
 
 let timers: Timer[];
 let isPopupOpen = false;

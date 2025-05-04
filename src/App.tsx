@@ -2,15 +2,7 @@ import { useEffect, useState } from "react";
 import "./output.css";
 import { Pomodoro } from "./Pomodoro";
 import { IoLogoLinkedin, IoMdArrowRoundBack } from "react-icons/io";
-import { TimerActions } from "./types";
-
-export type Timer = {
-  id: number;
-  timeLeft: number;
-  interval: number | undefined;
-  isRunning: boolean;
-  lastUpdatedAt: number;
-};
+import { Timer, TimerActions } from "./types";
 
 const MyComponent = () => {
   const [showTimerBlock, setShowTimerBlock] = useState<boolean>(false);

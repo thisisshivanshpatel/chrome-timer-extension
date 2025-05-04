@@ -4,3 +4,11 @@ export enum TimerActions {
   PLAY_TIMER = "playTimer",
   PAUSE_TIMER = "pauseTimer",
 }
+
+export type Timer = {
+  id: number;
+  timeLeft: number;
+  interval: number | undefined;
+  isRunning: boolean;
+  lastUpdatedAt: number;
+};
