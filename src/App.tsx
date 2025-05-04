@@ -14,9 +14,9 @@ export type Timer = {
 const MyComponent = () => {
   const [showTimerBlock, setShowTimerBlock] = useState<boolean>(false);
   const [showPomodoroBlock, setShowPomodoroBlock] = useState<boolean>(false);
-  const [hours, setHours] = useState<number>(0);
-  const [minutes, setMinutes] = useState<number>(0);
-  const [seconds, setSeconds] = useState<number>(0);
+  const [hours, setHours] = useState<number | undefined>(undefined);
+  const [minutes, setMinutes] = useState<number | undefined>(undefined);
+  const [seconds, setSeconds] = useState<number | undefined>(undefined);
   const [runningTimersArray, setRunningTimersArray] = useState<Timer[]>([]);
 
   chrome.runtime.connect({ name: "popup-open" });
@@ -28,7 +28,8 @@ const MyComponent = () => {
 
   const handleStartTimer = () => {
     if (hours || minutes || seconds) {
-      const timeLeft = hours * 3600 + minutes * 60 + seconds;
+      const timeLeft =
+        (hours ?? 0) * 3600 + (minutes ?? 0) * 60 + (seconds ?? 0);
       const timerId = Date.now();
 
       const timer = {
@@ -164,7 +165,7 @@ const MyComponent = () => {
 
   return (
     <>
-      <div className="main-container mb-10">
+      <div className="mb-10 main-container">
         <div className="content">
           <p className="ext-heading theme">Timer for Focus</p>
 
@@ -197,22 +198,24 @@ const MyComponent = () => {
                 </button>
               </div>
 
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "center",
-                  alignItems: "center",
-                }}
-              >
-                <button
-                  id="pomodoro"
-                  className="button"
-                  style={{ marginTop: "3px" }}
-                  onClick={() => setShowPomodoroBlock(true)}
+              {!(runningTimersArray?.length > 0) && (
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                  }}
                 >
-                  Pomodoro Timer
-                </button>
-              </div>
+                  <button
+                    id="pomodoro"
+                    className="button"
+                    style={{ marginTop: "3px" }}
+                    onClick={() => setShowPomodoroBlock(true)}
+                  >
+                    Pomodoro Timer
+                  </button>
+                </div>
+              )}
             </div>
           )}
 
