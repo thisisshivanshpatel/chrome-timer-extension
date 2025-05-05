@@ -1,16 +1,55 @@
-import { Timer, TimerActions } from "./types";
+type Config = {
+  isTimerRunning: boolean;
+  timers: Timer[];
+  isPomodoroTimerRunning: boolean;
+  pomodoroTimer: {
+    focusTimeLength: number;
+    isFocusTimerRunning: boolean;
+    breakTimeLength: number;
+    isBreakTimerRunning: boolean;
+    remainingSessionRounds: number;
+  };
+};
+
+type Timer = {
+  id: number;
+  timeLeft: number;
+  interval: number | undefined;
+  isRunning: boolean;
+  lastUpdatedAt: number;
+};
+
+enum TimerActions {
+  SET_TIMER = "setTimer",
+  REMOVE_TIMER = "removeTimer",
+  PLAY_TIMER = "playTimer",
+  PAUSE_TIMER = "pauseTimer",
+}
 
 let timers: Timer[];
 let isPopupOpen = false;
 
+const config: Config = {
+  isTimerRunning: false,
+  timers: [],
+  isPomodoroTimerRunning: false,
+  pomodoroTimer: {
+    focusTimeLength: 0,
+    isFocusTimerRunning: false,
+    breakTimeLength: 0,
+    isBreakTimerRunning: false,
+    remainingSessionRounds: 0,
+  },
+};
+
 chrome.runtime.onInstalled.addListener(() => {
   // initialize the timers array
-  chrome.storage.local.set({ timers: timers ?? [] });
+  chrome.storage.local.set({ config });
 });
 
 // Load the timers from local storage
-chrome.storage.local.get("timers", (result) => {
-  timers = result.timers || [];
+chrome.storage.local.get("config", (result) => {
+  timers = result.config.timers || [];
 });
 
 chrome.runtime.onConnect.addListener((port) => {
@@ -107,7 +146,7 @@ function startTimer(timer: Timer) {
 
 /** used for saving the data in extensions local storage */
 function saveTimers() {
-  chrome.storage.local.set({ timers: timers });
+  chrome.storage.local.set({ config: { ...config, timers } });
 }
 
 // notification

@@ -2,7 +2,21 @@ import { useEffect, useState } from "react";
 import "./output.css";
 import { Pomodoro } from "./Pomodoro";
 import { IoLogoLinkedin, IoMdArrowRoundBack } from "react-icons/io";
-import { Timer, TimerActions } from "./types";
+
+enum TimerActions {
+  SET_TIMER = "setTimer",
+  REMOVE_TIMER = "removeTimer",
+  PLAY_TIMER = "playTimer",
+  PAUSE_TIMER = "pauseTimer",
+}
+
+type Timer = {
+  id: number;
+  timeLeft: number;
+  interval: number | undefined;
+  isRunning: boolean;
+  lastUpdatedAt: number;
+};
 
 const MyComponent = () => {
   const [showTimerBlock, setShowTimerBlock] = useState<boolean>(false);
@@ -100,19 +114,18 @@ const MyComponent = () => {
   }
 
   function loadTimers() {
-    chrome.storage.local.get("timers", (result) => {
-      if (result.timers) {
-        const timers = Array.isArray(result.timers) ? result.timers : [];
+    chrome.storage.local.get("config", (result) => {
+      if (result.config.timers) {
+        const timers = Array.isArray(result.config.timers)
+          ? result.config.timers
+          : [];
+
+        setRunningTimersArray(timers);
 
         for (const timer of timers) {
           const difference = Date.now() - timer.lastUpdatedAt;
           if (difference >= 10000 && timer.isRunning) {
             sendMessage(TimerActions.PLAY_TIMER, timer);
-          }
-          if (runningTimersArray?.length > 0) {
-            setRunningTimersArray((prev) => [...prev, timer]);
-          } else {
-            setRunningTimersArray([timer]);
           }
         }
       }
@@ -124,8 +137,9 @@ const MyComponent = () => {
     const handleOnchange = (changes: {
       [key: string]: chrome.storage.StorageChange;
     }) => {
-      if (changes.timers) {
-        const newTimers: Timer[] = changes.timers.newValue;
+      if (changes.config?.newValue) {
+        const data = changes.config.newValue;
+        const newTimers: Timer[] = data.timers;
         // Replace the entire array instead of mapping
         setRunningTimersArray(newTimers);
       }
