@@ -1,23 +1,25 @@
-type Config = {
-  isTimerRunning: boolean;
-  timers: Timer[];
-  isPomodoroTimerRunning: boolean;
-  pomodoroTimer: {
-    focusTimeLength: number;
-    isFocusTimerRunning: boolean;
-    breakTimeLength: number;
-    isBreakTimerRunning: boolean;
-    remainingSessionRounds: number;
-  };
-};
-
 type Timer = {
   id: number;
   timeLeft: number;
   interval: number | undefined;
   isRunning: boolean;
   lastUpdatedAt: number;
+  isPomodoroTimerRunning: boolean;
+  pomodoroTimer?: {
+    focusTimeLength: number;
+    focusTimeNotificationMessage: string[];
+    isFocusTimerRunning: boolean;
+    breakTimeLength: number;
+    breakTimeNotificationMessage: string[];
+    isBreakTimerRunning: boolean;
+    remainingSessionRounds: number;
+    sessionEndNotificationMessage: string[];
+  };
 };
+
+enum DataStorage {
+  Timer = "timers",
+}
 
 enum TimerActions {
   SET_TIMER = "setTimer",
@@ -29,27 +31,14 @@ enum TimerActions {
 let timers: Timer[];
 let isPopupOpen = false;
 
-const config: Config = {
-  isTimerRunning: false,
-  timers: [],
-  isPomodoroTimerRunning: false,
-  pomodoroTimer: {
-    focusTimeLength: 0,
-    isFocusTimerRunning: false,
-    breakTimeLength: 0,
-    isBreakTimerRunning: false,
-    remainingSessionRounds: 0,
-  },
-};
-
 chrome.runtime.onInstalled.addListener(() => {
   // initialize the timers array
-  chrome.storage.local.set({ config });
+  chrome.storage.local.set({ timers: timers ?? [] });
 });
 
 // Load the timers from local storage
-chrome.storage.local.get("config", (result) => {
-  timers = result.config.timers || [];
+chrome.storage.local.get(DataStorage.Timer, (result) => {
+  timers = result.timers || [];
 });
 
 chrome.runtime.onConnect.addListener((port) => {
@@ -146,7 +135,28 @@ function startTimer(timer: Timer) {
 
 /** used for saving the data in extensions local storage */
 function saveTimers() {
-  chrome.storage.local.set({ config: { ...config, timers } });
+  chrome.storage.local.set({ timers });
+}
+
+/** `pomodoroCore` method is responsible for handling all the `pomodoro` functionality */
+function pomodoroCore(timer: Timer) {
+  //! use another way to update the timers object
+  if (timer.isPomodoroTimerRunning) {
+    if ((timer.pomodoroTimer?.remainingSessionRounds ?? 0) > 0) {
+      if (timer.pomodoroTimer?.isFocusTimerRunning) {
+        timer.pomodoroTimer.isFocusTimerRunning = false;
+        timer.pomodoroTimer.isBreakTimerRunning = true;
+        //? add time to timer
+      }
+
+      if (timer.pomodoroTimer?.isBreakTimerRunning) {
+        timer.pomodoroTimer.isBreakTimerRunning = false;
+        timer.pomodoroTimer.isFocusTimerRunning = true;
+        timer.pomodoroTimer.remainingSessionRounds =
+          timer.pomodoroTimer.remainingSessionRounds - 1;
+      }
+    }
+  }
 }
 
 // notification

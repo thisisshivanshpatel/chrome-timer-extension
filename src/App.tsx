@@ -16,7 +16,22 @@ type Timer = {
   interval: number | undefined;
   isRunning: boolean;
   lastUpdatedAt: number;
+  isPomodoroTimerRunning: boolean;
+  pomodoroTimer?: {
+    focusTimeLength: number;
+    focusTimeNotificationMessage: string[];
+    isFocusTimerRunning: boolean;
+    breakTimeLength: number;
+    breakTimeNotificationMessage: string[];
+    isBreakTimerRunning: boolean;
+    remainingSessionRounds: number;
+    sessionEndNotificationMessage: string[];
+  };
 };
+
+enum DataStorage {
+  Timer = "timers",
+}
 
 const MyComponent = () => {
   const [showTimerBlock, setShowTimerBlock] = useState<boolean>(false);
@@ -39,12 +54,13 @@ const MyComponent = () => {
         (hours ?? 0) * 3600 + (minutes ?? 0) * 60 + (seconds ?? 0);
       const timerId = Date.now();
 
-      const timer = {
+      const timer: Timer = {
         id: timerId,
         timeLeft: timeLeft,
         interval: undefined,
         isRunning: true,
         lastUpdatedAt: Date.now(),
+        isPomodoroTimerRunning: false,
       };
 
       if (runningTimersArray?.length > 0) {
@@ -114,11 +130,9 @@ const MyComponent = () => {
   }
 
   function loadTimers() {
-    chrome.storage.local.get("config", (result) => {
-      if (result.config.timers) {
-        const timers = Array.isArray(result.config.timers)
-          ? result.config.timers
-          : [];
+    chrome.storage.local.get(DataStorage.Timer, (result) => {
+      if (result.timers) {
+        const timers = Array.isArray(result.timers) ? result.timers : [];
 
         setRunningTimersArray(timers);
 
@@ -137,9 +151,8 @@ const MyComponent = () => {
     const handleOnchange = (changes: {
       [key: string]: chrome.storage.StorageChange;
     }) => {
-      if (changes.config?.newValue) {
-        const data = changes.config.newValue;
-        const newTimers: Timer[] = data.timers;
+      if (changes.timers?.newValue) {
+        const newTimers: Timer[] = changes.timers?.newValue;
         // Replace the entire array instead of mapping
         setRunningTimersArray(newTimers);
       }
