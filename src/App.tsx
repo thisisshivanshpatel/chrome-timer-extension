@@ -10,6 +10,17 @@ enum TimerActions {
   PAUSE_TIMER = "pauseTimer",
 }
 
+type PomodoroTimer = {
+  focusTimeLength: number;
+  focusTimeNotificationMessage: string[];
+  isFocusTimerRunning: boolean;
+  breakTimeLength: number;
+  breakTimeNotificationMessage: string[];
+  isBreakTimerRunning: boolean;
+  remainingSessionRounds: number;
+  sessionEndNotificationMessage: string[];
+};
+
 type Timer = {
   id: number;
   timeLeft: number;
@@ -17,16 +28,7 @@ type Timer = {
   isRunning: boolean;
   lastUpdatedAt: number;
   isPomodoroTimerRunning: boolean;
-  pomodoroTimer?: {
-    focusTimeLength: number;
-    focusTimeNotificationMessage: string[];
-    isFocusTimerRunning: boolean;
-    breakTimeLength: number;
-    breakTimeNotificationMessage: string[];
-    isBreakTimerRunning: boolean;
-    remainingSessionRounds: number;
-    sessionEndNotificationMessage: string[];
-  };
+  pomodoroTimer?: PomodoroTimer;
 };
 
 enum DataStorage {
@@ -48,7 +50,10 @@ const MyComponent = () => {
   const unPauseOrCancel = new Audio("sounds/unpauseSound.mp3");
   const cancelSound = new Audio("sounds/cancelSound.mp3");
 
-  const handleStartTimer = () => {
+  const handleStartTimer = (
+    pomodoroTimer?: PomodoroTimer,
+    isPomodoroTimerRunning: boolean = false
+  ) => {
     if (hours || minutes || seconds) {
       const timeLeft =
         (hours ?? 0) * 3600 + (minutes ?? 0) * 60 + (seconds ?? 0);
@@ -62,6 +67,10 @@ const MyComponent = () => {
         lastUpdatedAt: Date.now(),
         isPomodoroTimerRunning: false,
       };
+
+      // if (isPomodoroTimerRunning) {
+
+      // }
 
       if (runningTimersArray?.length > 0) {
         setRunningTimersArray((prev) => [...prev, timer]);

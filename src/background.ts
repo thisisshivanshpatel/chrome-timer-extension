@@ -62,7 +62,7 @@ chrome.runtime.onConnect.addListener((port) => {
 // });
 
 chrome.runtime.onMessage.addListener(
-  (request: { data: Timer; action: string }) => {
+  (request: { data: Timer; action: TimerActions }) => {
     const timer = timers?.find((t) => t?.id === request?.data?.id);
 
     switch (request.action) {
@@ -121,6 +121,10 @@ function startTimer(timer: Timer) {
         });
       }
 
+      if (timer.isPomodoroTimerRunning) {
+        pomodoroCore(timer);
+      }
+
       timers = timers.filter((t) => t.id !== timer.id);
       saveTimers();
       backGroundAudio();
@@ -138,22 +142,77 @@ function saveTimers() {
   chrome.storage.local.set({ timers });
 }
 
+/** used for sending message to the message consumer */
+function sendMessage(action: TimerActions, data: Timer) {
+  chrome.runtime.sendMessage({
+    action,
+    data: {
+      ...data,
+    },
+  });
+}
+
 /** `pomodoroCore` method is responsible for handling all the `pomodoro` functionality */
 function pomodoroCore(timer: Timer) {
-  //! use another way to update the timers object
   if (timer.isPomodoroTimerRunning) {
     if ((timer.pomodoroTimer?.remainingSessionRounds ?? 0) > 0) {
+      const timeLeft = (timer?.pomodoroTimer?.breakTimeLength ?? 0) * 60;
+      const timerId = Date.now();
+
       if (timer.pomodoroTimer?.isFocusTimerRunning) {
-        timer.pomodoroTimer.isFocusTimerRunning = false;
-        timer.pomodoroTimer.isBreakTimerRunning = true;
-        //? add time to timer
+        const BreakTimer: Timer = {
+          id: timerId,
+          timeLeft: timeLeft,
+          interval: undefined,
+          isRunning: true,
+          lastUpdatedAt: Date.now(),
+          isPomodoroTimerRunning: true,
+          pomodoroTimer: {
+            focusTimeLength: timer.pomodoroTimer.focusTimeLength,
+            focusTimeNotificationMessage:
+              timer.pomodoroTimer.focusTimeNotificationMessage,
+            isFocusTimerRunning: false,
+            breakTimeLength: timer.pomodoroTimer.breakTimeLength,
+            breakTimeNotificationMessage:
+              timer.pomodoroTimer.breakTimeNotificationMessage,
+            isBreakTimerRunning: true,
+            remainingSessionRounds: timer.pomodoroTimer.remainingSessionRounds,
+            sessionEndNotificationMessage:
+              timer.pomodoroTimer.sessionEndNotificationMessage,
+          },
+        };
+
+        sendMessage(TimerActions.SET_TIMER, BreakTimer);
       }
 
       if (timer.pomodoroTimer?.isBreakTimerRunning) {
-        timer.pomodoroTimer.isBreakTimerRunning = false;
-        timer.pomodoroTimer.isFocusTimerRunning = true;
-        timer.pomodoroTimer.remainingSessionRounds =
+        const remainingSessionRounds =
           timer.pomodoroTimer.remainingSessionRounds - 1;
+
+        if (remainingSessionRounds > 0) {
+          const FocusTimer: Timer = {
+            id: timerId,
+            timeLeft: timeLeft,
+            interval: undefined,
+            isRunning: true,
+            lastUpdatedAt: Date.now(),
+            isPomodoroTimerRunning: true,
+            pomodoroTimer: {
+              focusTimeLength: timer.pomodoroTimer.focusTimeLength,
+              focusTimeNotificationMessage:
+                timer.pomodoroTimer.focusTimeNotificationMessage,
+              isFocusTimerRunning: true,
+              breakTimeLength: timer.pomodoroTimer.breakTimeLength,
+              breakTimeNotificationMessage:
+                timer.pomodoroTimer.breakTimeNotificationMessage,
+              isBreakTimerRunning: false,
+              remainingSessionRounds,
+              sessionEndNotificationMessage:
+                timer.pomodoroTimer.sessionEndNotificationMessage,
+            },
+          };
+          sendMessage(TimerActions.SET_TIMER, FocusTimer);
+        }
       }
     }
   }
