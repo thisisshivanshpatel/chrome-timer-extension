@@ -67,13 +67,7 @@ chrome.runtime.onMessage.addListener(
 
     switch (request.action) {
       case TimerActions.SET_TIMER: {
-        // pushing the timer to the timers array
-        timers.push(request.data);
-        // Save the timers array to local
-        saveTimers();
-
-        //start the timer
-        startTimer(request.data);
+        setTimer(request.data);
         break;
       }
       case TimerActions.REMOVE_TIMER: {
@@ -105,6 +99,17 @@ chrome.runtime.onMessage.addListener(
     }
   }
 );
+
+/** used for setting a timer */
+function setTimer(timer: Timer) {
+  // pushing the timer to the timers array
+  timers.push(timer);
+  // Save the timers array to local
+  saveTimers();
+
+  //start the timer
+  startTimer(timer);
+}
 
 /** used for starting the timer */
 function startTimer(timer: Timer) {
@@ -142,16 +147,6 @@ function saveTimers() {
   chrome.storage.local.set({ timers });
 }
 
-/** used for sending message to the message consumer */
-function sendMessage(action: TimerActions, data: Timer) {
-  chrome.runtime.sendMessage({
-    action,
-    data: {
-      ...data,
-    },
-  });
-}
-
 /** `pomodoroCore` method is responsible for handling all the `pomodoro` functionality */
 function pomodoroCore(timer: Timer) {
   if (timer.isPomodoroTimerRunning) {
@@ -182,7 +177,7 @@ function pomodoroCore(timer: Timer) {
           },
         };
 
-        sendMessage(TimerActions.SET_TIMER, BreakTimer);
+        setTimer(BreakTimer);
       }
 
       if (timer.pomodoroTimer?.isBreakTimerRunning) {
@@ -211,7 +206,8 @@ function pomodoroCore(timer: Timer) {
                 timer.pomodoroTimer.sessionEndNotificationMessage,
             },
           };
-          sendMessage(TimerActions.SET_TIMER, FocusTimer);
+
+          setTimer(FocusTimer);
         }
       }
     }

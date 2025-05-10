@@ -54,7 +54,7 @@ const MyComponent = () => {
     pomodoroTimer?: PomodoroTimer,
     isPomodoroTimerRunning: boolean = false
   ) => {
-    if (hours || minutes || seconds) {
+    if (hours || minutes || seconds || isPomodoroTimerRunning) {
       const timeLeft =
         (hours ?? 0) * 3600 + (minutes ?? 0) * 60 + (seconds ?? 0);
       const timerId = Date.now();
@@ -68,9 +68,22 @@ const MyComponent = () => {
         isPomodoroTimerRunning: false,
       };
 
-      // if (isPomodoroTimerRunning) {
+      // pomodoro timer
+      if (
+        isPomodoroTimerRunning &&
+        Object.values(pomodoroTimer ?? {}).length > 0
+      ) {
+        const PomodoroTimerData: Timer = {
+          ...timer,
+          timeLeft: (pomodoroTimer?.focusTimeLength ?? 0) * 60,
+          isPomodoroTimerRunning: true,
+          pomodoroTimer,
+        };
 
-      // }
+        sendMessage(TimerActions.SET_TIMER, PomodoroTimerData);
+        audio.play();
+        return;
+      }
 
       if (runningTimersArray?.length > 0) {
         setRunningTimersArray((prev) => [...prev, timer]);
@@ -114,7 +127,7 @@ const MyComponent = () => {
   }
 
   /** method used for sending message to the background script */
-  function sendMessage(action: string, data: Timer) {
+  function sendMessage(action: TimerActions, data: Timer) {
     chrome.runtime.sendMessage(
       {
         action,
@@ -314,7 +327,12 @@ const MyComponent = () => {
           )}
 
           {showPomodoroBlock && (
-            <Pomodoro goBack={() => setShowPomodoroBlock((prev) => !prev)} />
+            <Pomodoro
+              goBack={() => setShowPomodoroBlock((prev) => !prev)}
+              setPomodoroTimer={(pomodoroTimer, isPomodoroTimerRunning) =>
+                handleStartTimer(pomodoroTimer, isPomodoroTimerRunning)
+              }
+            />
           )}
 
           {runningTimersArray?.length > 0 && !showPomodoroBlock && (
