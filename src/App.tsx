@@ -2,12 +2,18 @@ import { useEffect, useState } from "react";
 import "./output.css";
 import { Pomodoro } from "./Pomodoro";
 import { IoLogoLinkedin, IoMdArrowRoundBack } from "react-icons/io";
+import { Box, CircularProgress } from "@mui/material";
 
 enum TimerActions {
   SET_TIMER = "setTimer",
   REMOVE_TIMER = "removeTimer",
   PLAY_TIMER = "playTimer",
   PAUSE_TIMER = "pauseTimer",
+}
+
+enum PomodoroTimerType {
+  FOCUS_TIMER = "focusTimer",
+  BREAK_TIMER = "breakTimer",
 }
 
 type PomodoroTimer = {
@@ -42,6 +48,11 @@ const MyComponent = () => {
   const [minutes, setMinutes] = useState<number | undefined>(undefined);
   const [seconds, setSeconds] = useState<number | undefined>(undefined);
   const [runningTimersArray, setRunningTimersArray] = useState<Timer[]>([]);
+  const [isPomodoroTimerRunning, setIsPomodoroTimerRunning] =
+    useState<boolean>(false);
+  const [runningPomodoroTimer, setRunningPomodoroTimer] = useState<
+    { timer: Timer; totalTime: number; type: PomodoroTimerType } | undefined
+  >(undefined);
 
   chrome.runtime.connect({ name: "popup-open" });
 
@@ -101,11 +112,22 @@ const MyComponent = () => {
   };
 
   /** used for removing timer*/
-  function removeTimerFromDom(timer: Timer, fromUI: boolean = false) {
-    const filteredTimer = runningTimersArray.filter(
-      (key) => key?.id !== timer?.id
-    );
-    setRunningTimersArray(filteredTimer);
+  function removeTimerFromDom(
+    timer: Timer,
+    fromUI: boolean = false,
+    isPomodoroTimerRunning = false
+  ) {
+    if (!isPomodoroTimerRunning) {
+      const filteredTimer = runningTimersArray.filter(
+        (key) => key?.id !== timer?.id
+      );
+      setRunningTimersArray(filteredTimer);
+    }
+
+    if (isPomodoroTimerRunning) {
+      setIsPomodoroTimerRunning(false);
+      setRunningPomodoroTimer(undefined);
+    }
 
     cancelSound.play();
 
@@ -142,10 +164,17 @@ const MyComponent = () => {
   }
 
   /** method used for returning formatted time */
-  function formatTime(seconds: number) {
+  function formatTime(seconds: number, isPomodoroTimerRunning = false) {
     const hours = Math.floor(seconds / 3600);
     const minutes = Math.floor((seconds % 3600) / 60);
     const secs = seconds % 60;
+
+    if (isPomodoroTimerRunning) {
+      return `${minutes.toString().padStart(2, "0")}:${secs
+        .toString()
+        .padStart(2, "0")}`;
+    }
+
     return `${hours.toString().padStart(2, "0")}:${minutes
       .toString()
       .padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
@@ -154,9 +183,29 @@ const MyComponent = () => {
   function loadTimers() {
     chrome.storage.local.get(DataStorage.Timer, (result) => {
       if (result.timers) {
-        const timers = Array.isArray(result.timers) ? result.timers : [];
+        const timers: Timer[] = Array.isArray(result.timers)
+          ? result.timers
+          : [];
 
-        setRunningTimersArray(timers);
+        const singleTimer = timers?.[0];
+        if (singleTimer?.isPomodoroTimerRunning) {
+          setIsPomodoroTimerRunning(true);
+
+          if (!isPomodoroTimerRunning) {
+            setIsPomodoroTimerRunning(true);
+          }
+          setRunningPomodoroTimer({
+            timer: singleTimer,
+            type: singleTimer?.pomodoroTimer?.isFocusTimerRunning
+              ? PomodoroTimerType.FOCUS_TIMER
+              : PomodoroTimerType.BREAK_TIMER,
+            totalTime: singleTimer?.pomodoroTimer?.isFocusTimerRunning
+              ? singleTimer?.pomodoroTimer?.focusTimeLength ?? 0
+              : singleTimer?.pomodoroTimer?.breakTimeLength ?? 0,
+          });
+        } else {
+          setRunningTimersArray(timers);
+        }
 
         for (const timer of timers) {
           const difference = Date.now() - timer.lastUpdatedAt;
@@ -175,8 +224,24 @@ const MyComponent = () => {
     }) => {
       if (changes.timers?.newValue) {
         const newTimers: Timer[] = changes.timers?.newValue;
-        // Replace the entire array instead of mapping
-        setRunningTimersArray(newTimers);
+
+        const singleTimer = newTimers?.[0];
+        if (singleTimer?.isPomodoroTimerRunning) {
+          if (!isPomodoroTimerRunning) {
+            setIsPomodoroTimerRunning(true);
+          }
+          setRunningPomodoroTimer({
+            timer: singleTimer,
+            type: singleTimer?.pomodoroTimer?.isFocusTimerRunning
+              ? PomodoroTimerType.FOCUS_TIMER
+              : PomodoroTimerType.BREAK_TIMER,
+            totalTime: singleTimer?.pomodoroTimer?.isFocusTimerRunning
+              ? singleTimer?.pomodoroTimer?.focusTimeLength ?? 0
+              : singleTimer?.pomodoroTimer?.breakTimeLength ?? 0,
+          });
+        } else {
+          setRunningTimersArray(newTimers);
+        }
       }
     };
     chrome.storage.onChanged.addListener(handleOnchange);
@@ -218,10 +283,11 @@ const MyComponent = () => {
               height="200px"
               width="200px"
               alt="Clock"
+              aria-label="Clock icon"
             />
           </div>
 
-          {!showTimerBlock && !showPomodoroBlock && (
+          {!showTimerBlock && !showPomodoroBlock && !isPomodoroTimerRunning && (
             <div id="button-block">
               <div
                 style={{
@@ -357,6 +423,8 @@ const MyComponent = () => {
                       onClick={() => {
                         pauseTimer(timer);
                       }}
+                      aria-label="Pause timer"
+                      role="button"
                     />
                     <img
                       src="icons/play.png"
@@ -368,6 +436,8 @@ const MyComponent = () => {
                       onClick={() => {
                         playTimer(timer);
                       }}
+                      aria-label="Play timer"
+                      role="button"
                     />
                     <img
                       src="icons/cancel.png"
@@ -378,11 +448,123 @@ const MyComponent = () => {
                       onClick={() => {
                         removeTimerFromDom(timer, true);
                       }}
+                      aria-label="Cancel timer"
+                      role="button"
                     />
                   </div>
                 </div>
               ))}
             </div>
+          )}
+
+          {isPomodoroTimerRunning && (
+            <Box
+              sx={{
+                position: "relative",
+                display: "flex",
+                justifyContent: "center",
+                marginTop: 6,
+              }}
+            >
+              <CircularProgress
+                variant="determinate"
+                value={
+                  ((runningPomodoroTimer?.timer?.timeLeft ?? 0) /
+                    ((runningPomodoroTimer?.totalTime ?? 1) * 60)) *
+                  100
+                }
+                size={200}
+                thickness={4}
+                sx={{
+                  backgroundColor: "rgba(0, 0, 0, 0.1)",
+                  borderRadius: "50%",
+                  color: "#8B5DFF",
+                  "& .MuiCircularProgress-circle": {
+                    strokeLinecap: "round",
+                  },
+                }}
+              />
+              <Box
+                sx={{
+                  top: 0,
+                  left: 15,
+                  bottom: 0,
+                  right: 0,
+                  position: "absolute",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <div className="flex flex-col items-center justify-center w-full gap-2">
+                  <div className="flex justify-center gap-4">
+                    <img
+                      src="icons/pause.png"
+                      height="22"
+                      width="22"
+                      className="cursor-pointer playPause"
+                      id="pause-pomodoro"
+                      style={{
+                        display: runningPomodoroTimer?.timer?.isRunning
+                          ? ""
+                          : "none",
+                      }}
+                      onClick={() => {
+                        if (runningPomodoroTimer?.timer) {
+                          pauseTimer(runningPomodoroTimer.timer);
+                        }
+                      }}
+                      aria-label="Pause timer"
+                      role="button"
+                    />
+                    <img
+                      src="icons/play.png"
+                      height="22"
+                      width="22"
+                      className="cursor-pointer playPause"
+                      id="play-pomodoro-timer"
+                      style={{
+                        display: runningPomodoroTimer?.timer?.isRunning
+                          ? "none"
+                          : "",
+                      }}
+                      onClick={() => {
+                        if (runningPomodoroTimer?.timer) {
+                          playTimer(runningPomodoroTimer.timer);
+                        }
+                      }}
+                      aria-label="Play timer"
+                      role="button"
+                    />
+                    <img
+                      src="icons/cancel.png"
+                      height="22"
+                      width="22"
+                      className="cursor-pointer playPause"
+                      id="cancel-timer"
+                      onClick={() => {
+                        if (runningPomodoroTimer?.timer) {
+                          removeTimerFromDom(
+                            runningPomodoroTimer.timer,
+                            true,
+                            true
+                          );
+                        }
+                      }}
+                      aria-label="Cancel timer"
+                      role="button"
+                    />
+                  </div>
+
+                  <p className="text-2xl font-bold text-center time">
+                    {formatTime(
+                      runningPomodoroTimer?.timer?.timeLeft ?? 0,
+                      true
+                    )}
+                  </p>
+                </div>
+              </Box>
+            </Box>
           )}
         </div>
       </div>
