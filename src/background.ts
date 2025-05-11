@@ -28,6 +28,11 @@ enum TimerActions {
   PAUSE_TIMER = "pauseTimer",
 }
 
+enum PomodoroTimerType {
+  FOCUS_TIMER = "focusTimer",
+  BREAK_TIMER = "breakTimer",
+}
+
 let timers: Timer[];
 let isPopupOpen = false;
 
@@ -133,7 +138,30 @@ function startTimer(timer: Timer) {
       timers = timers.filter((t) => t.id !== timer.id);
       saveTimers();
       backGroundAudio();
-      displayNotification();
+
+      let notificationMessage = "";
+
+      if (timer.isPomodoroTimerRunning) {
+        const TimerType = timer.pomodoroTimer?.isFocusTimerRunning
+          ? PomodoroTimerType.FOCUS_TIMER
+          : PomodoroTimerType.BREAK_TIMER;
+
+        if (
+          timer.pomodoroTimer?.isBreakTimerRunning &&
+          !(timer.pomodoroTimer?.remainingSessionRounds - 1)
+        ) {
+          notificationMessage = getRandomMessage(
+            timer.pomodoroTimer.sessionEndNotificationMessage
+          );
+        } else {
+          notificationMessage = getRandomMessage(
+            TimerType === PomodoroTimerType.FOCUS_TIMER
+              ? timer.pomodoroTimer?.focusTimeNotificationMessage ?? []
+              : timer.pomodoroTimer?.breakTimeNotificationMessage ?? []
+          );
+        }
+      }
+      displayNotification(notificationMessage);
     } else {
       timer.timeLeft--;
       timer.lastUpdatedAt = Date.now();
@@ -151,7 +179,10 @@ function saveTimers() {
 function pomodoroCore(timer: Timer) {
   if (timer.isPomodoroTimerRunning) {
     if ((timer.pomodoroTimer?.remainingSessionRounds ?? 0) > 0) {
-      const timeLeft = (timer?.pomodoroTimer?.breakTimeLength ?? 0) * 60;
+      const timeLeft =
+        (timer?.pomodoroTimer?.isFocusTimerRunning
+          ? timer?.pomodoroTimer?.breakTimeLength
+          : timer?.pomodoroTimer?.focusTimeLength ?? 0) * 60;
       const timerId = Date.now();
 
       if (timer.pomodoroTimer?.isFocusTimerRunning) {
@@ -217,11 +248,11 @@ function pomodoroCore(timer: Timer) {
 // notification
 
 /** used for displaying notification */
-function displayNotification() {
+function displayNotification(notificationMessage = "") {
   const notificationOptions: chrome.notifications.NotificationOptions<true> = {
     type: "basic",
     title: "Timer For Focus",
-    message: "Time Up",
+    message: notificationMessage ? notificationMessage : "Time Up",
     iconUrl: "icons/clock128.png",
   };
 
@@ -250,4 +281,10 @@ async function backGroundAudio() {
   } catch (error) {
     console.error("Error handling offscreen document:", error);
   }
+}
+
+/** method for getting random notification messages */
+function getRandomMessage(notifications: string[]): string {
+  const randomIndex = Math.floor(Math.random() * notifications.length);
+  return notifications[randomIndex];
 }

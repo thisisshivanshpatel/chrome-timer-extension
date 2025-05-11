@@ -117,14 +117,14 @@ const MyComponent = () => {
     fromUI: boolean = false,
     isPomodoroTimerRunning = false
   ) {
-    if (!isPomodoroTimerRunning) {
+    if (!isPomodoroTimerRunning && !timer?.isPomodoroTimerRunning) {
       const filteredTimer = runningTimersArray.filter(
         (key) => key?.id !== timer?.id
       );
       setRunningTimersArray(filteredTimer);
     }
 
-    if (isPomodoroTimerRunning) {
+    if (isPomodoroTimerRunning || timer?.isPomodoroTimerRunning) {
       setIsPomodoroTimerRunning(false);
       setRunningPomodoroTimer(undefined);
     }

@@ -15,13 +15,27 @@ type PomodoroTimer = {
 };
 
 const focusTimeNotificationMessage = [
-  "Hurray Focus Time is over now enjoy the break 😎",
-  "Time up take a Break 🍀",
+  "Great work! Time for a well-deserved break 🌟",
+  "Focus session complete! Take a moment to recharge 🎯",
+  "You've crushed that focus session! Break time 🚀",
+  "Excellent focus! Time to refresh your mind 🧠",
+  "Mission accomplished! Enjoy your break 🎉",
 ];
-const sessionEndNotificationMessage = ["you have done it ⌛️"];
+
 const breakTimeNotificationMessage = [
-  "Break is over now get back to work 🚀",
-  "Break Time is up 😇",
+  "Break's over! Ready to achieve more? 💪",
+  "Time to get back in the zone! 🎯",
+  "Recharged and ready? Let's continue! 🔋",
+  "Break complete! Your next win awaits 🌟",
+  "Back to making progress! You've got this 🚀",
+];
+
+const sessionEndNotificationMessage = [
+  "Amazing job! You've completed all your sessions 🏆",
+  "Congratulations on maintaining your focus streak! 🌟",
+  "You've achieved your goal for today! Time to celebrate 🎉",
+  "Fantastic work! Your dedication is inspiring ⭐",
+  "Mission accomplished! You're crushing it 💪",
 ];
 
 export const Pomodoro = ({
@@ -37,13 +51,6 @@ export const Pomodoro = ({
   const [focusTimeLength, setFocusTimeLength] = useState(25);
   const [breakTimeLength, setBreakTimeLength] = useState(5);
   const [sessionRoundsLength, setSessionRoundsLength] = useState(1);
-
-  console.log(
-    "hi.........>",
-    focusTimeLength,
-    breakTimeLength,
-    sessionRoundsLength
-  );
 
   const FocusTimer: PomodoroTimer = {
     focusTimeLength: focusTimeLength,
