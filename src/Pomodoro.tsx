@@ -49,8 +49,8 @@ export const Pomodoro = ({
   ) => void;
 }) => {
   const [focusTimeLength, setFocusTimeLength] = useState(25);
-  const [breakTimeLength, setBreakTimeLength] = useState(5);
-  const [sessionRoundsLength, setSessionRoundsLength] = useState(1);
+  const [breakTimeLength, setBreakTimeLength] = useState(10);
+  const [sessionRoundsLength, setSessionRoundsLength] = useState(2);
 
   const FocusTimer: PomodoroTimer = {
     focusTimeLength: focusTimeLength,
