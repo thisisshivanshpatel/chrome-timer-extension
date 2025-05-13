@@ -458,113 +458,120 @@ const MyComponent = () => {
           )}
 
           {isPomodoroTimerRunning && (
-            <Box
-              sx={{
-                position: "relative",
-                display: "flex",
-                justifyContent: "center",
-                marginTop: 6,
-              }}
-            >
-              <CircularProgress
-                variant="determinate"
-                value={
-                  ((runningPomodoroTimer?.timer?.timeLeft ?? 0) /
-                    ((runningPomodoroTimer?.totalTime ?? 1) * 60)) *
-                  100
-                }
-                size={200}
-                thickness={4}
-                sx={{
-                  backgroundColor: "rgba(0, 0, 0, 0.1)",
-                  borderRadius: "50%",
-                  color: "#8B5DFF",
-                  "& .MuiCircularProgress-circle": {
-                    strokeLinecap: "round",
-                  },
-                }}
-              />
+            <>
+              <div className="mt-4 text-2xl text-center">
+                {runningPomodoroTimer?.type === PomodoroTimerType.FOCUS_TIMER
+                  ? "Focus Time 💻"
+                  : "Break Time 🍀"}
+              </div>
               <Box
                 sx={{
-                  top: 0,
-                  left: 15,
-                  bottom: 0,
-                  right: 0,
-                  position: "absolute",
+                  position: "relative",
                   display: "flex",
-                  alignItems: "center",
                   justifyContent: "center",
+                  marginTop: 6,
                 }}
               >
-                <div className="flex flex-col items-center justify-center w-full gap-2">
-                  <div className="flex justify-center gap-4">
-                    <img
-                      src="icons/pause.png"
-                      height="22"
-                      width="22"
-                      className="cursor-pointer playPause"
-                      id="pause-pomodoro"
-                      style={{
-                        display: runningPomodoroTimer?.timer?.isRunning
-                          ? ""
-                          : "none",
-                      }}
-                      onClick={() => {
-                        if (runningPomodoroTimer?.timer) {
-                          pauseTimer(runningPomodoroTimer.timer);
-                        }
-                      }}
-                      aria-label="Pause timer"
-                      role="button"
-                    />
-                    <img
-                      src="icons/play.png"
-                      height="22"
-                      width="22"
-                      className="cursor-pointer playPause"
-                      id="play-pomodoro-timer"
-                      style={{
-                        display: runningPomodoroTimer?.timer?.isRunning
-                          ? "none"
-                          : "",
-                      }}
-                      onClick={() => {
-                        if (runningPomodoroTimer?.timer) {
-                          playTimer(runningPomodoroTimer.timer);
-                        }
-                      }}
-                      aria-label="Play timer"
-                      role="button"
-                    />
-                    <img
-                      src="icons/cancel.png"
-                      height="22"
-                      width="22"
-                      className="cursor-pointer playPause"
-                      id="cancel-timer"
-                      onClick={() => {
-                        if (runningPomodoroTimer?.timer) {
-                          removeTimerFromDom(
-                            runningPomodoroTimer.timer,
-                            true,
-                            true
-                          );
-                        }
-                      }}
-                      aria-label="Cancel timer"
-                      role="button"
-                    />
-                  </div>
+                <CircularProgress
+                  variant="determinate"
+                  value={
+                    ((runningPomodoroTimer?.timer?.timeLeft ?? 0) /
+                      ((runningPomodoroTimer?.totalTime ?? 1) * 60)) *
+                    100
+                  }
+                  size={200}
+                  thickness={4}
+                  sx={{
+                    backgroundColor: "rgba(0, 0, 0, 0.1)",
+                    borderRadius: "50%",
+                    color: "#8B5DFF",
+                    "& .MuiCircularProgress-circle": {
+                      strokeLinecap: "round",
+                    },
+                  }}
+                />
+                <Box
+                  sx={{
+                    top: 0,
+                    left: 15,
+                    bottom: 0,
+                    right: 0,
+                    position: "absolute",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <div className="flex flex-col items-center justify-center w-full gap-2">
+                    <div className="flex justify-center gap-4">
+                      <img
+                        src="icons/pause.png"
+                        height="22"
+                        width="22"
+                        className="cursor-pointer playPause"
+                        id="pause-pomodoro"
+                        style={{
+                          display: runningPomodoroTimer?.timer?.isRunning
+                            ? ""
+                            : "none",
+                        }}
+                        onClick={() => {
+                          if (runningPomodoroTimer?.timer) {
+                            pauseTimer(runningPomodoroTimer.timer);
+                          }
+                        }}
+                        aria-label="Pause timer"
+                        role="button"
+                      />
+                      <img
+                        src="icons/play.png"
+                        height="22"
+                        width="22"
+                        className="cursor-pointer playPause"
+                        id="play-pomodoro-timer"
+                        style={{
+                          display: runningPomodoroTimer?.timer?.isRunning
+                            ? "none"
+                            : "",
+                        }}
+                        onClick={() => {
+                          if (runningPomodoroTimer?.timer) {
+                            playTimer(runningPomodoroTimer.timer);
+                          }
+                        }}
+                        aria-label="Play timer"
+                        role="button"
+                      />
+                      <img
+                        src="icons/cancel.png"
+                        height="22"
+                        width="22"
+                        className="cursor-pointer playPause"
+                        id="cancel-timer"
+                        onClick={() => {
+                          if (runningPomodoroTimer?.timer) {
+                            removeTimerFromDom(
+                              runningPomodoroTimer.timer,
+                              true,
+                              true
+                            );
+                          }
+                        }}
+                        aria-label="Cancel timer"
+                        role="button"
+                      />
+                    </div>
 
-                  <p className="text-2xl font-bold text-center time">
-                    {formatTime(
-                      runningPomodoroTimer?.timer?.timeLeft ?? 0,
-                      true
-                    )}
-                  </p>
-                </div>
+                    <p className="text-2xl font-bold text-center time">
+                      {formatTime(
+                        runningPomodoroTimer?.timer?.timeLeft ?? 0,
+                        true
+                      )}
+                    </p>
+                  </div>
+                </Box>
               </Box>
-            </Box>
+            </>
           )}
         </div>
       </div>
