@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "Timer for Focus",
+  "name": "Timez Timer & Pomodoro",
   "version": "2.0.0",
-  "description": "This extension will help you set a timer for your tasks",
+  "description": "This extension will help you set a timer for your tasks and you can use its pomodoro feature to set a pomodoro timer",
   "icons": {
     "16": "icons/clock16.png",
     "48": "icons/clock48.png",

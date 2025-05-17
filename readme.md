@@ -7,6 +7,7 @@ This project is a simple Chrome extension that provides a timer functionality. I
 ## Features
 
 - Set a timer for a specific duration
+- Set a Pomodoro Timer
 - Receive notifications when the timer ends
 - Simple and intuitive user interface
 
@@ -33,9 +34,11 @@ Contributions are welcome! Please open an issue or submit a pull request.
 
 ## Next Feature targets
 
-1. Timer completion Notification
-2. snooze feature
-3. Adding Time spent on sites tracking feature
+1. ~~Timer completion Notification~~
+2. ~~Pomodoro Timer~~
+3. snooze feature
+4. Adding Time spent on sites tracking feature
+5. Giving report about how many sessions you have completed 
 
 ## License
 

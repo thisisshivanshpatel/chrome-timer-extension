@@ -274,7 +274,7 @@ const MyComponent = () => {
     <>
       <div className="mb-10 main-container">
         <div className="content">
-          <p className="ext-heading theme">Timer for Focus</p>
+          <p className="mt-2 ext-heading theme">Timez Timer & Pomodoro</p>
 
           <div style={{ display: "flex", justifyContent: "center" }}>
             <img
